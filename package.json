@@ -1,0 +1,46 @@
+{
+  "name": "hfst-js",
+  "version": "1.4.0",
+  "description": "A pure JavaScript implementation of HFST for using HFST optimized lookup transducers (with or without weights)",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./src/index.js",
+  "types": "./index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./src/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "src",
+    "dist",
+    "index.d.ts",
+    "README.md",
+    "LICENCE"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "build": "node scripts/build.js",
+    "prepack": "node scripts/build.js",
+    "prepublishOnly": "npm run test && npm run build",
+    "web": "node web/server.js",
+    "start": "node web/server.js",
+    "dev:web": "node web/server.js"
+  },
+  "keywords": [
+    "hfst",
+    "fst",
+    "optimized-lookup",
+    "hfstol",
+    "pyhfst",
+    "morphology",
+    "transducers",
+    "nlp",
+    "finite-state"
+  ],
+  "author": "Rootroo Ltd (original pyhfst) & Antigravity",
+  "license": "Apache-2.0"
+}

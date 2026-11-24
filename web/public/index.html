@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HFST-JS Interactive Tester & Morphological Playground</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="header-content">
+        <div class="logo-area">
+          <div class="logo-badge">hfst-js</div>
+          <div>
+            <h1>HFST-JS Interactive Tester</h1>
+            <p class="subtitle">Pure JavaScript Helsinki Finite-State Technology (pyhfst rewrite)</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <div class="engine-badge" id="engineStatus">
+            <span class="status-dot"></span>
+            <span id="engineLabel">Node.js Server</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <!-- Controls Toolbar -->
+      <section class="card controls-card">
+        <div class="controls-grid">
+          <!-- Execution Mode -->
+          <div class="control-group">
+            <label for="executionMode">Execution Engine</label>
+            <div class="segmented-control">
+              <button type="button" class="segment active" data-mode="server" id="btnModeServer">
+                <span class="icon">⚡</span> Node.js Server
+              </button>
+              <button type="button" class="segment" data-mode="browser" id="btnModeBrowser">
+                <span class="icon">🌐</span> Client Browser
+              </button>
+            </div>
+          </div>
+
+          <!-- Model Selection -->
+          <div class="control-group flex-1">
+            <label for="modelSelect">Select Transducer Model</label>
+            <div class="select-wrapper">
+              <select id="modelSelect">
+                <option value="">Scanning models...</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Upload Custom FST -->
+          <div class="control-group">
+            <label>Custom Transducer</label>
+            <label class="btn btn-secondary file-upload-btn">
+              <span>📁 Open .hfstol</span>
+              <input type="file" id="fileInput" accept=".hfstol,.hfst" style="display: none;">
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- Search & Input Section -->
+      <section class="card query-card">
+        <div class="input-container">
+          <div class="input-wrapper">
+            <input 
+              type="text" 
+              id="wordInput" 
+              placeholder="Type word to analyze (e.g., voi, ihmettelen, koirani)..." 
+              autocomplete="off" 
+              spellcheck="false"
+              autofocus
+            >
+            <button id="clearBtn" class="clear-btn" title="Clear input">×</button>
+          </div>
+          <button id="lookupBtn" class="btn btn-primary">
+            <span>Lookup</span>
+          </button>
+        </div>
+
+        <!-- Quick Samples -->
+        <div class="quick-samples">
+          <span class="samples-label">Examples:</span>
+          <div id="sampleChips" class="sample-chips">
+            <!-- Dynamically populated based on model -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Results & Stats Section -->
+      <div class="results-layout">
+        <!-- Main Results -->
+        <section class="card results-card flex-2">
+          <div class="card-header">
+            <div class="card-title-group">
+              <h2>Analysis Results</h2>
+              <span class="count-badge" id="resultCount">0 matches</span>
+            </div>
+            <div class="card-header-actions">
+              <button class="btn btn-sm" id="btnToggleJson" title="View raw JSON">JSON</button>
+            </div>
+          </div>
+
+          <!-- Results List -->
+          <div id="resultsContainer" class="results-container">
+            <div class="empty-state" id="emptyState">
+              <div class="empty-icon">🔍</div>
+              <p>Type a word above or click one of the example chips to test morphological analysis.</p>
+            </div>
+            <div id="resultsList" class="results-list" style="display: none;"></div>
+            <pre id="jsonViewer" class="json-viewer" style="display: none;"></pre>
+          </div>
+        </section>
+
+        <!-- Model Info & Performance Stats -->
+        <section class="card stats-card flex-1">
+          <div class="card-header">
+            <h2>Transducer Metrics</h2>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-box">
+              <span class="stat-label">Lookup Latency</span>
+              <span class="stat-value highlight" id="statLatency">—</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Model Load Time</span>
+              <span class="stat-value" id="statLoadTime">—</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Weighted FST</span>
+              <span class="stat-value" id="statWeighted">—</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Alphabet Symbols</span>
+              <span class="stat-value" id="statSymbols">—</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Index Table Size</span>
+              <span class="stat-value" id="statIndexSize">—</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Transition Table Size</span>
+              <span class="stat-value" id="statTransSize">—</span>
+            </div>
+          </div>
+
+          <!-- Drag and drop dropzone for convenience -->
+          <div class="dropzone" id="dropzone">
+            <div class="dropzone-content">
+              <span class="dropzone-icon">📥</span>
+              <p>Drag & drop any <code>.hfstol</code> file here to test in browser</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="app-footer">
+      <p>
+        <strong>hfst-js</strong> • Written in pure JavaScript & TypeScript • Based on 
+        <a href="https://pypi.org/project/pyhfst/" target="_blank" rel="noopener">pyhfst</a>
+        (Alnajjar & Hämäläinen, 2023)
+      </p>
+    </footer>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
